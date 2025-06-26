@@ -186,8 +186,9 @@ Zachęcamy do zgłaszania:
 
 ---
 
-**👨‍💻 Autor**: Piotr Wojtów  
-**🔍 Rewident kodu**: Blazej Ejsmont ze wsparciem Claude AI  
+**👨‍💻 Autor**: Błażej "Olafejs" Ejsmont  
+**🔍 Pierwotny projekt**: Piotr Wojtów | **Rewizja kodu**: ze wsparciem Claude AI  
+**💖 Wsparcie**: [suppi.pl/olafejs](https://suppi.pl/olafejs)  
 **📅 Data utworzenia**: 2025  
 **🔄 Ostatnia aktualizacja**: 2025  
 **🌍 Wykonano**: w Polsce z ❤️
