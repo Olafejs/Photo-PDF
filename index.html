@@ -520,7 +520,6 @@
         <img src="${imageData.dataUrl}" alt="${imageData.name}">
         <textarea 
           placeholder="Wpisz opis do zdjęcia..." 
-          oninput="updateDescription('${imageData.id}', this.value)"
           maxlength="500"
         >${imageData.description}</textarea>
         <div style="text-align: right; font-size: 12px; color: #666; margin-top: 5px;">
@@ -530,13 +529,17 @@
       
       elements.preview.appendChild(div);
       
-      // Dodaj licznik znaków
+      // Dodaj licznik znaków i aktualizację opisu
       const textarea = div.querySelector('textarea');
       const charCount = div.querySelector('.char-count');
       
       textarea.addEventListener('input', () => {
         charCount.textContent = textarea.value.length;
+        updateDescription(imageData.id, textarea.value);
       });
+      
+      // Ustaw początkowy licznik znaków
+      charCount.textContent = imageData.description.length;
     }
 
     function removeImage(id) {
@@ -556,6 +559,9 @@
       const image = images.find(img => img.id === id);
       if (image) {
         image.description = description;
+        console.log(`Opis zaktualizowany dla ${image.name}: "${description}"`);
+      } else {
+        console.log(`Nie znaleziono obrazu o ID: ${id}`);
       }
     }
 
@@ -580,6 +586,9 @@
       elements.generateBtn.disabled = true;
 
       try {
+        // Debug: sprawdź opisy przed generowaniem PDF
+        console.log('Opisy przed generowaniem PDF:', images.map(img => ({ name: img.name, description: img.description })));
+
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pageWidth = pdf.internal.pageSize.getWidth();
@@ -591,6 +600,7 @@
           if (i > 0) pdf.addPage();
 
           const image = images[i];
+          console.log(`Przetwarzanie obrazu ${i + 1}: "${image.name}", opis: "${image.description}"`);
           
           // Dodaj obrazek
           const img = new Image();
@@ -615,16 +625,24 @@
               );
               
               // Dodaj opis
-              if (image.description.trim()) {
+              if (image.description && image.description.trim()) {
+                console.log(`Dodaję opis: "${image.description}"`);
                 pdf.setFontSize(12);
                 pdf.setFont(undefined, 'normal');
                 
-                const lines = pdf.splitTextToSize(image.description, contentWidth);
+                const lines = pdf.splitTextToSize(image.description.trim(), contentWidth);
                 const textY = margin + finalHeight + 10;
                 
-                if (textY + (lines.length * 5) < pageHeight - margin) {
+                console.log(`Pozycja tekstu Y: ${textY}, wysokość strony: ${pageHeight}, margin: ${margin}`);
+                
+                if (textY + (lines.length * 7) < pageHeight - margin) {
                   pdf.text(lines, margin, textY);
+                  console.log('Tekst dodany do PDF');
+                } else {
+                  console.log('Tekst nie zmieścił się na stronie');
                 }
+              } else {
+                console.log('Brak opisu dla tego obrazu');
               }
               
               resolve();
