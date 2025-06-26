@@ -2,150 +2,665 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PDF ze zdjęć i opisów</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-      background-color: #f5f5f5;
+    * {
+      box-sizing: border-box;
     }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background-color: #fff;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
     h1 {
       text-align: center;
       color: #333;
+      margin-bottom: 30px;
+      font-size: 28px;
     }
+    
+    .upload-section {
+      margin-bottom: 30px;
+    }
+    
     #dropZone {
-      border: 2px dashed #aaa;
+      border: 3px dashed #ddd;
       padding: 40px;
       text-align: center;
-      margin-bottom: 30px;
-      background-color: #fff;
+      margin-bottom: 20px;
+      background-color: #fafafa;
       cursor: pointer;
-      transition: 0.3s;
+      transition: all 0.3s ease;
+      border-radius: 10px;
+      position: relative;
     }
+    
     #dropZone.hover {
-      background-color: #e0f7fa;
-      border-color: #00bcd4;
+      background-color: #e3f2fd;
+      border-color: #2196f3;
+      transform: scale(1.02);
     }
+    
+    #dropZone.error {
+      background-color: #ffebee;
+      border-color: #f44336;
+    }
+    
+    .upload-info {
+      background-color: #f0f8ff;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #2196f3;
+    }
+    
+    .upload-info h3 {
+      margin: 0 0 10px 0;
+      color: #1976d2;
+    }
+    
+    .upload-info ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    
     #preview .image-block {
       background-color: #fff;
       padding: 20px;
       margin-bottom: 20px;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border: 1px solid #eee;
+      position: relative;
     }
+    
     #preview img {
       max-width: 100%;
+      max-height: 400px;
       height: auto;
       display: block;
-      margin-bottom: 10px;
+      margin: 0 auto 15px auto;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
+    
     #preview textarea {
       width: 100%;
-      height: 60px;
+      height: 80px;
       resize: vertical;
       font-size: 14px;
-      padding: 10px;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-family: inherit;
+      transition: border-color 0.3s;
     }
-    button {
-      display: block;
-      margin: 30px auto;
-      padding: 15px 30px;
-      font-size: 16px;
-      background-color: #00bcd4;
+    
+    #preview textarea:focus {
+      outline: none;
+      border-color: #2196f3;
+    }
+    
+    .remove-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #f44336;
       color: white;
       border: none;
-      border-radius: 5px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
       cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s;
     }
-    button:hover {
-      background-color: #0097a7;
+    
+    .remove-btn:hover {
+      background: #d32f2f;
     }
+    
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background-color: #eee;
+      border-radius: 3px;
+      margin: 10px 0;
+      overflow: hidden;
+      display: none;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #4caf50, #8bc34a);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    
+    .actions {
+      text-align: center;
+      margin-top: 30px;
+    }
+    
+    button {
+      padding: 15px 30px;
+      font-size: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      margin: 0 10px;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .clear-btn {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    }
+    
     input[type="file"] {
       display: none;
+    }
+    
+    .error-message, .success-message {
+      padding: 12px;
+      border-radius: 8px;
+      margin: 10px 0;
+      display: none;
+    }
+    
+    .error-message {
+      background-color: #ffebee;
+      color: #c62828;
+      border: 1px solid #ffcdd2;
+    }
+    
+    .success-message {
+      background-color: #e8f5e8;
+      color: #2e7d32;
+      border: 1px solid #c8e6c9;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #3498db;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .image-count {
+      text-align: center;
+      margin: 20px 0;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    
+    @media (max-width: 600px) {
+      .container {
+        margin: 10px;
+        padding: 20px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      button {
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h1>📸 Generuj PDF ze zdjęć i opisów</h1>
+    
+    <div class="upload-section">
+      <div class="upload-info">
+        <h3>ℹ️ Informacje o przesyłaniu:</h3>
+        <ul>
+          <li>Maksymalny rozmiar pliku: 10 MB</li>
+          <li>Obsługiwane formaty: JPG, PNG, GIF, WebP</li>
+          <li>Maksymalnie 50 zdjęć na raz</li>
+          <li>Zdjęcia będą automatycznie skompresowane dla lepszej wydajności</li>
+        </ul>
+      </div>
+      
+      <div id="dropZone">
+        <p>📂 Przeciągnij tutaj zdjęcia lub kliknij, aby wybrać</p>
+        <p style="font-size: 14px; color: #666; margin-top: 10px;">
+          Wspierane formaty: JPG, PNG, GIF, WebP
+        </p>
+        <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" multiple id="imageInput">
+      </div>
+      
+      <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      
+      <div class="error-message" id="errorMessage"></div>
+      <div class="success-message" id="successMessage"></div>
+    </div>
 
-  <h1>📸 Generuj PDF ze zdjęć i opisów</h1>
+    <div class="image-count" id="imageCount" style="display: none;">
+      📊 Liczba załadowanych zdjęć: <span id="count">0</span>
+    </div>
 
-  <div id="dropZone">
-    <p>📂 Przeciągnij tutaj zdjęcia lub kliknij, aby wybrać</p>
-    <input type="file" accept="image/*" multiple id="imageInput">
+    <div id="preview"></div>
+    
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Generowanie PDF...</p>
+    </div>
+
+    <div class="actions">
+      <button onclick="generatePDF()" id="generateBtn" disabled>📄 Generuj PDF</button>
+      <button onclick="clearAll()" class="clear-btn" id="clearBtn" style="display: none;">🗑️ Wyczyść wszystko</button>
+    </div>
+
+    <!-- Stopka -->
+    <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; font-size: 14px; color: #666;">
+      <p>
+        👨‍💻 <strong>Autor:</strong> Piotr Wojtów<br>
+        🔍 <strong>Rewident kodu:</strong> Blazej Ejsmont ze wsparciem Claude AI<br>
+        <span style="font-size: 12px; margin-top: 10px; display: block;">
+          © 2025 Photo-PDF | Wersja 2.0 | Wykonano z ❤️ w Polsce
+        </span>
+      </p>
+    </footer>
   </div>
-
-  <div id="preview"></div>
-
-  <button onclick="generatePDF()">📄 Generuj PDF</button>
 
   <!-- Biblioteki -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
-    const dropZone = document.getElementById('dropZone');
-    const imageInput = document.getElementById('imageInput');
-    const preview = document.getElementById('preview');
+    // Konfiguracja
+    const CONFIG = {
+      MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+      MAX_FILES: 50,
+      ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+      MAX_IMAGE_WIDTH: 1200,
+      MAX_IMAGE_HEIGHT: 1200,
+      COMPRESSION_QUALITY: 0.8
+    };
 
-    // Kliknięcie strefy = otwórz input
-    dropZone.addEventListener('click', () => imageInput.click());
+    // Elementy DOM
+    const elements = {
+      dropZone: document.getElementById('dropZone'),
+      imageInput: document.getElementById('imageInput'),
+      preview: document.getElementById('preview'),
+      progressBar: document.getElementById('progressBar'),
+      progressFill: document.getElementById('progressFill'),
+      errorMessage: document.getElementById('errorMessage'),
+      successMessage: document.getElementById('successMessage'),
+      generateBtn: document.getElementById('generateBtn'),
+      clearBtn: document.getElementById('clearBtn'),
+      loading: document.getElementById('loading'),
+      imageCount: document.getElementById('imageCount'),
+      count: document.getElementById('count')
+    };
 
-    // Obsługa inputa
-    imageInput.addEventListener('change', (e) => handleFiles(e.target.files));
+    let images = [];
 
-    // Obsługa drag & drop
-    dropZone.addEventListener('dragover', (e) => {
+    // Event listeners
+    elements.dropZone.addEventListener('click', () => elements.imageInput.click());
+    elements.imageInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+    // Drag & Drop
+    elements.dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
-      dropZone.classList.add('hover');
+      elements.dropZone.classList.add('hover');
     });
 
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.classList.remove('hover');
+    elements.dropZone.addEventListener('dragleave', () => {
+      elements.dropZone.classList.remove('hover');
     });
 
-    dropZone.addEventListener('drop', (e) => {
+    elements.dropZone.addEventListener('drop', (e) => {
       e.preventDefault();
-      dropZone.classList.remove('hover');
+      elements.dropZone.classList.remove('hover');
       if (e.dataTransfer.files.length) {
         handleFiles(e.dataTransfer.files);
       }
     });
 
-    // Funkcja obsługująca dodawanie zdjęć
-    function handleFiles(files) {
-      Array.from(files).forEach((file) => {
-        if (!file.type.startsWith('image/')) return;
+    // Funkcje pomocnicze
+    function showError(message) {
+      elements.errorMessage.textContent = message;
+      elements.errorMessage.style.display = 'block';
+      elements.successMessage.style.display = 'none';
+      elements.dropZone.classList.add('error');
+      setTimeout(() => {
+        elements.dropZone.classList.remove('error');
+      }, 3000);
+    }
 
-        const reader = new FileReader();
-        reader.onload = () => {
-          const div = document.createElement('div');
-          div.className = 'image-block';
-          div.innerHTML = `
-            <img src="${reader.result}">
-            <textarea placeholder="Wpisz opis do zdjęcia..."></textarea>
-          `;
-          preview.appendChild(div);
+    function showSuccess(message) {
+      elements.successMessage.textContent = message;
+      elements.successMessage.style.display = 'block';
+      elements.errorMessage.style.display = 'none';
+    }
+
+    function hideMessages() {
+      elements.errorMessage.style.display = 'none';
+      elements.successMessage.style.display = 'none';
+    }
+
+    function updateImageCount() {
+      const count = images.length;
+      elements.count.textContent = count;
+      elements.imageCount.style.display = count > 0 ? 'block' : 'none';
+      elements.generateBtn.disabled = count === 0;
+      elements.clearBtn.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+
+    function validateFile(file) {
+      if (!CONFIG.ALLOWED_TYPES.includes(file.type)) {
+        return `Nieprawidłowy format pliku: ${file.name}. Obsługiwane formaty: JPG, PNG, GIF, WebP`;
+      }
+      if (file.size > CONFIG.MAX_FILE_SIZE) {
+        return `Plik ${file.name} jest za duży. Maksymalny rozmiar: ${CONFIG.MAX_FILE_SIZE / 1024 / 1024}MB`;
+      }
+      return null;
+    }
+
+    function compressImage(file) {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = () => {
+          let { width, height } = img;
+          
+          // Oblicz nowe wymiary z zachowaniem proporcji
+          if (width > CONFIG.MAX_IMAGE_WIDTH || height > CONFIG.MAX_IMAGE_HEIGHT) {
+            const ratio = Math.min(CONFIG.MAX_IMAGE_WIDTH / width, CONFIG.MAX_IMAGE_HEIGHT / height);
+            width *= ratio;
+            height *= ratio;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', CONFIG.COMPRESSION_QUALITY));
         };
-        reader.readAsDataURL(file);
+        
+        img.src = URL.createObjectURL(file);
       });
+    }
+
+    function updateProgress(current, total) {
+      const percentage = (current / total) * 100;
+      elements.progressFill.style.width = percentage + '%';
+      
+      if (current === total) {
+        setTimeout(() => {
+          elements.progressBar.style.display = 'none';
+        }, 500);
+      }
+    }
+
+    // Główna funkcja obsługi plików
+    async function handleFiles(files) {
+      hideMessages();
+      
+      const fileArray = Array.from(files);
+      
+      // Walidacja liczby plików
+      if (images.length + fileArray.length > CONFIG.MAX_FILES) {
+        showError(`Można dodać maksymalnie ${CONFIG.MAX_FILES} zdjęć. Obecnie masz ${images.length} zdjęć.`);
+        return;
+      }
+
+      // Walidacja plików
+      const validFiles = [];
+      for (const file of fileArray) {
+        const error = validateFile(file);
+        if (error) {
+          showError(error);
+          return;
+        }
+        validFiles.push(file);
+      }
+
+      if (validFiles.length === 0) return;
+
+      // Pokaż pasek postępu
+      elements.progressBar.style.display = 'block';
+      elements.progressFill.style.width = '0%';
+
+      try {
+        // Przetwarzaj pliki
+        for (let i = 0; i < validFiles.length; i++) {
+          const file = validFiles[i];
+          const compressedDataUrl = await compressImage(file);
+          
+          const imageData = {
+            id: Date.now() + Math.random(),
+            name: file.name,
+            dataUrl: compressedDataUrl,
+            description: ''
+          };
+          
+          images.push(imageData);
+          renderImage(imageData);
+          
+          updateProgress(i + 1, validFiles.length);
+        }
+
+        showSuccess(`Pomyślnie dodano ${validFiles.length} zdjęć`);
+        updateImageCount();
+        
+      } catch (error) {
+        console.error('Błąd podczas przetwarzania zdjęć:', error);
+        showError('Wystąpił błąd podczas przetwarzania zdjęć');
+      }
+    }
+
+    function renderImage(imageData) {
+      const div = document.createElement('div');
+      div.className = 'image-block';
+      div.dataset.id = imageData.id;
+      
+      div.innerHTML = `
+        <button class="remove-btn" onclick="removeImage('${imageData.id}')" title="Usuń zdjęcie">×</button>
+        <img src="${imageData.dataUrl}" alt="${imageData.name}">
+        <textarea 
+          placeholder="Wpisz opis do zdjęcia..." 
+          onchange="updateDescription('${imageData.id}', this.value)"
+          maxlength="500"
+        >${imageData.description}</textarea>
+        <div style="text-align: right; font-size: 12px; color: #666; margin-top: 5px;">
+          Znaki: <span class="char-count">0</span>/500
+        </div>
+      `;
+      
+      elements.preview.appendChild(div);
+      
+      // Dodaj licznik znaków
+      const textarea = div.querySelector('textarea');
+      const charCount = div.querySelector('.char-count');
+      
+      textarea.addEventListener('input', () => {
+        charCount.textContent = textarea.value.length;
+      });
+    }
+
+    function removeImage(id) {
+      images = images.filter(img => img.id !== id);
+      const element = document.querySelector(`[data-id="${id}"]`);
+      if (element) {
+        element.remove();
+      }
+      updateImageCount();
+      
+      if (images.length === 0) {
+        hideMessages();
+      }
+    }
+
+    function updateDescription(id, description) {
+      const image = images.find(img => img.id === id);
+      if (image) {
+        image.description = description;
+      }
+    }
+
+    function clearAll() {
+      if (confirm('Czy na pewno chcesz usunąć wszystkie zdjęcia?')) {
+        images = [];
+        elements.preview.innerHTML = '';
+        updateImageCount();
+        hideMessages();
+        showSuccess('Wszystkie zdjęcia zostały usunięte');
+      }
     }
 
     // Generowanie PDF
     async function generatePDF() {
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF();
-      const blocks = document.querySelectorAll('.image-block');
-
-      for (let i = 0; i < blocks.length; i++) {
-        if (i > 0) pdf.addPage();
-
-        const canvas = await html2canvas(blocks[i]);
-        const imgData = canvas.toDataURL('image/png');
-        pdf.addImage(imgData, 'PNG', 10, 10, 190, 0);
+      if (images.length === 0) {
+        showError('Dodaj przynajmniej jedno zdjęcie');
+        return;
       }
 
-      pdf.save('zdjecia-z-opisami.pdf');
+      elements.loading.style.display = 'block';
+      elements.generateBtn.disabled = true;
+
+      try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 15;
+        const contentWidth = pageWidth - (2 * margin);
+
+        for (let i = 0; i < images.length; i++) {
+          if (i > 0) pdf.addPage();
+
+          const image = images[i];
+          
+          // Dodaj obrazek
+          const img = new Image();
+          img.src = image.dataUrl;
+          
+          await new Promise((resolve) => {
+            img.onload = () => {
+              const imgWidth = img.width;
+              const imgHeight = img.height;
+              const ratio = Math.min(contentWidth / imgWidth, (pageHeight - 80) / imgHeight);
+              
+              const finalWidth = imgWidth * ratio;
+              const finalHeight = imgHeight * ratio;
+              
+              pdf.addImage(
+                image.dataUrl, 
+                'JPEG', 
+                margin + (contentWidth - finalWidth) / 2, 
+                margin, 
+                finalWidth, 
+                finalHeight
+              );
+              
+              // Dodaj opis
+              if (image.description.trim()) {
+                pdf.setFontSize(12);
+                pdf.setFont(undefined, 'normal');
+                
+                const lines = pdf.splitTextToSize(image.description, contentWidth);
+                const textY = margin + finalHeight + 10;
+                
+                if (textY + (lines.length * 5) < pageHeight - margin) {
+                  pdf.text(lines, margin, textY);
+                }
+              }
+              
+              resolve();
+            };
+          });
+        }
+
+        // Dodaj metadane
+        pdf.setProperties({
+          title: 'Zdjęcia z opisami',
+          subject: 'PDF wygenerowany przez aplikację Photo-PDF',
+          author: 'Photo-PDF App',
+          creator: 'Photo-PDF App'
+        });
+
+        const fileName = `zdjecia-z-opisami-${new Date().toISOString().split('T')[0]}.pdf`;
+        pdf.save(fileName);
+        
+        showSuccess(`PDF został pomyślnie wygenerowany: ${fileName}`);
+        
+      } catch (error) {
+        console.error('Błąd podczas generowania PDF:', error);
+        showError('Wystąpił błąd podczas generowania PDF. Spróbuj ponownie.');
+      } finally {
+        elements.loading.style.display = 'none';
+        elements.generateBtn.disabled = false;
+      }
     }
+
+    // Obsługa błędów globalnych
+    window.addEventListener('error', (e) => {
+      console.error('Błąd aplikacji:', e.error);
+      showError('Wystąpił nieoczekiwany błąd. Odśwież stronę i spróbuj ponownie.');
+    });
+
+    // Inicjalizacja
+    updateImageCount();
   </script>
 </body>
 </html>
