@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PDF ze zdjęć i opisów</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📸</text></svg>">
   <style>
     * {
       box-sizing: border-box;
@@ -399,10 +400,12 @@
 
     function updateImageCount() {
       const count = images.length;
+      console.log(`Aktualizacja licznika: ${count} zdjęć`);
       elements.count.textContent = count;
       elements.imageCount.style.display = count > 0 ? 'block' : 'none';
       elements.generateBtn.disabled = count === 0;
       elements.clearBtn.style.display = count > 0 ? 'inline-block' : 'none';
+      console.log(`Licznik zaktualizowany na: ${elements.count.textContent}`);
     }
 
     function validateFile(file) {
@@ -489,7 +492,7 @@
           const compressedDataUrl = await compressImage(file);
           
           const imageData = {
-            id: Date.now() + Math.random(),
+            id: 'img_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
             name: file.name,
             dataUrl: compressedDataUrl,
             description: ''
@@ -543,12 +546,23 @@
     }
 
     function removeImage(id) {
+      console.log(`Próba usunięcia obrazu o ID: ${id}`);
+      const initialCount = images.length;
       images = images.filter(img => img.id !== id);
+      const finalCount = images.length;
+      
+      console.log(`Liczba obrazów: ${initialCount} → ${finalCount}`);
+      
       const element = document.querySelector(`[data-id="${id}"]`);
       if (element) {
         element.remove();
+        console.log('Element DOM usunięty');
+      } else {
+        console.log('Nie znaleziono elementu DOM do usunięcia');
       }
+      
       updateImageCount();
+      console.log('updateImageCount() wywołane');
       
       if (images.length === 0) {
         hideMessages();
