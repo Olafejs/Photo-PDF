@@ -644,7 +644,8 @@
               if (image.description && image.description.trim()) {
                 console.log(`Dodaję opis: "${image.description}"`);
                 pdf.setFontSize(12);
-                pdf.setFont(undefined, 'normal');
+                // Use a defined font to avoid jsPDF errors
+                pdf.setFont('helvetica', 'normal');
                 
                 const lines = pdf.splitTextToSize(image.description.trim(), contentWidth);
                 const textY = margin + finalHeight + 10;
